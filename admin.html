@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Solicitudes Recibidas</title>
+  <style>
+    body { font-family: sans-serif; }
+    #login { max-width: 300px; margin: 60px auto; text-align: center; }
+    #contenido { max-width: 500px; margin: 50px auto; display:none; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #aaa; padding: 8px; text-align: left; }
+    th { background: #f0f0f0; }
+    .error { color: red; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <div id="login">
+    <h2>Acceso restringido</h2>
+    <input type="password" id="pass" placeholder="Contraseña">
+    <button onclick="entrar()">Entrar</button>
+    <div id="error" class="error"></div>
+  </div>
+  <div id="contenido">
+    <h2>Solicitudes Recibidas</h2>
+    <table id="tabla"></table>
+  </div>
+  <script>
+    function entrar() {
+      const pass = document.getElementById('pass').value;
+      fetch('https://script.google.com/macros/s/AKfycbwF2cAeeoIodM_kzLu7yB4nxGEOFFti3FahANJ69NhuFDqrB7AP10SQT9HrOHgyymR3oQ/exec?pass=' + encodeURIComponent(pass))
+      .then(r => r.text())
+      .then(text => {
+        let data;
+        try { data = JSON.parse(text); } catch { data = text; }
+        if (Array.isArray(data)) {
+          document.getElementById('login').style.display = 'none';
+          document.getElementById('contenido').style.display = '';
+          let html = '<tr><th>Email</th><th>Salón, Horario, Día y Duración</th></tr>';
+          data.forEach((row, idx) => {
+            if (idx === 0) return; // Saltar cabecera
+            html += `<tr><td>${row[0]}</td><td>${row[1]}</td></tr>`;
+          });
+          document.getElementById('tabla').innerHTML = html;
+        } else {
+          document.getElementById('error').textContent = 'Contraseña incorrecta o error de acceso.';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
